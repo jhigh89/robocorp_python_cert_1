@@ -3,18 +3,22 @@ from robocorp import browser, log
 import json
 from RPA.HTTP import HTTP
 from RPA.Excel.Files import Files
+from RPA.PDF import PDF
 
 @task
 def robot_spare_bin_python():
     """Insert the sales data for the week and export it as a PDF."""
     browser.configure(
-        slowmo=1000,
+        slowmo=100,
     )
     open_the_intranet_website()
     with log.suppress_variables():
         log_in()
     download_excel_file()
     fill_form_with_excel_data()
+    collect_results()
+    export_as_pdf()
+    log_out()
     
 def load_config(config_path):
     try:
@@ -64,6 +68,24 @@ def fill_and_submit_sales_form(sales_rep):
     page.click("text=Submit")
 
 def download_excel_file():
-    """Downloads the Excel file from the intranet."""
+    """Downloads excel file from the given URL"""
     http = HTTP()
-    http.download("https://robotsparebinindustries.com/intranet/SalesData.xlsx", overwrite=True)
+    http.download(url="https://robotsparebinindustries.com/SalesData.xlsx", overwrite=True)
+
+def collect_results():
+    """Take a screenshot of the page."""
+    page = browser.page()
+    page.screenshot(path="output/sales_summary.png")
+
+def export_as_pdf():
+    """Export the page as a PDF."""
+    page = browser.page()
+    sales_results_html = page.locator("#sales-results").inner_html()
+
+    pdf = PDF()
+    pdf.html_to_pdf(sales_results_html, "output/sales_results.pdf")
+
+def log_out():
+    """Log out from the intranet."""
+    page = browser.page()
+    page.click("text=Log out")

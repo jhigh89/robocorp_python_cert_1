@@ -17,3 +17,5 @@ testrun/*
 *.pkl
 config.json
 SalesData.xlsx
+*.png
+*.pdf
